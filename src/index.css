@@ -1,0 +1,200 @@
+/* --- MANAGED FONT IMPORTS START (do not edit manually) --- */
+/* INTERNAL USE NAME: Heading */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+/* INTERNAL USE NAME: Body */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* --- MANAGED FONT IMPORTS END --- */
+
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import './_designSystem/ds-fc59a7d7-cc26-446d-9879-7ca9b194b88e/index.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+:root {
+  --gray-50: #FAFAFA;
+  --gray-100: #F4F4F5;
+  --gray-200: #E4E4E7;
+  --gray-300: #D4D4D8;
+  --gray-400: #A1A1AA;
+  --gray-500: #71717A;
+  --gray-600: #52525B;
+  --gray-700: #3F3F46;
+  --gray-800: #27272A;
+  --gray-900: #18181B;
+  --gray-950: #0A0A0B;
+  --blue-50: #EFF6FF;
+  --blue-300: #93C5FD;
+  --blue-400: #60A5FA;
+  --blue-500: #3B82F6;
+  --blue-600: #2563EB;
+  --blue-700: #1D4ED8;
+  --blue-950: #172554;
+  --green-50: #F0FDF4;
+  --green-300: #86EFAC;
+  --green-700: #15803D;
+  --green-950: #052E16;
+  --amber-50: #FFFBEB;
+  --amber-300: #FCD34D;
+  --amber-800: #92400E;
+  --amber-950: #451A03;
+  --red-50: #FEF2F2;
+  --red-300: #FCA5A5;
+  --red-700: #B91C1C;
+  --red-950: #450A0A;
+  /* Semantic tokens — light theme */
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --border: #E4E4E7;
+  --text-primary: #18181B;
+  --text-secondary: #71717A;
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-subtle: #EFF6FF;
+  --accent-subtle-foreground: #1D4ED8;
+  --focus-ring: #2563EB;
+  --success-background: #F0FDF4;
+  --success-foreground: #15803D;
+  --warning-background: #FFFBEB;
+  --warning-foreground: #92400E;
+  --danger-background: #FEF2F2;
+  --danger-foreground: #B91C1C;
+  --info-background: #EFF6FF;
+  --info-foreground: #1D4ED8;
+  /* Neutral fills that must follow the theme */
+  --muted: #F4F4F5;
+  --muted-strong: #E4E4E7;
+  --muted-hover: #FAFAFA;
+  --on-accent: #FFFFFF;
+  --on-success: #FFFFFF;
+  --on-danger: #FFFFFF;
+  /* The `-dark` aliases resolve to the LIGHT values by default so that a
+     `dark:` utility can never darken the UI while the light theme is active.
+     They are overridden with real dark values inside `.dark` below. */
+  --background-dark: var(--background);
+  --surface-dark: var(--surface);
+  --surface-elevated-dark: var(--surface-elevated);
+  --border-dark: var(--border);
+  --text-primary-dark: var(--text-primary);
+  --text-secondary-dark: var(--text-secondary);
+  --accent-dark: var(--accent);
+  --accent-hover-dark: var(--accent-hover);
+  --accent-subtle-dark: var(--accent-subtle);
+  --accent-subtle-foreground-dark: var(--accent-subtle-foreground);
+  --focus-ring-dark: var(--focus-ring);
+  --success-background-dark: var(--success-background);
+  --success-foreground-dark: var(--success-foreground);
+  --warning-background-dark: var(--warning-background);
+  --warning-foreground-dark: var(--warning-foreground);
+  --danger-background-dark: var(--danger-background);
+  --danger-foreground-dark: var(--danger-foreground);
+  --info-background-dark: var(--info-background);
+  --info-foreground-dark: var(--info-foreground);
+  --spacing-0-5: 2px;
+  --spacing-1: 4px;
+  --spacing-1-5: 6px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --border-width-hairline: 1px;
+  --border-width-default: 1px;
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-sm: 0 2px 6px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.08), 0 2px 4px rgba(16, 24, 40, 0.05);
+  --font-size-2-xs: 11px;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --line-height-table: 1.2;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.4;
+}
+/* Class-based dark mode: one toggle repaints every surface, including
+   design-system components, because they all read these tokens. */
+.dark {
+  --background: #0A0A0B;
+  --surface: #18181B;
+  --surface-elevated: #27272A;
+  --border: #27272A;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-subtle: #172554;
+  --accent-subtle-foreground: #93C5FD;
+  --focus-ring: #60A5FA;
+  --success-background: #052E16;
+  --success-foreground: #86EFAC;
+  --warning-background: #451A03;
+  --warning-foreground: #FCD34D;
+  --danger-background: #450A0A;
+  --danger-foreground: #FCA5A5;
+  --info-background: #172554;
+  --info-foreground: #93C5FD;
+  --muted: #27272A;
+  --muted-strong: #3F3F46;
+  --muted-hover: #27272A;
+  --on-accent: #FFFFFF;
+  --on-success: #052E16;
+  --on-danger: #450A0A;
+  --background-dark: #0A0A0B;
+  --surface-dark: #18181B;
+  --surface-elevated-dark: #27272A;
+  --border-dark: #27272A;
+  --text-primary-dark: #FAFAFA;
+  --text-secondary-dark: #A1A1AA;
+  --accent-dark: #3B82F6;
+  --accent-hover-dark: #2563EB;
+  --accent-subtle-dark: #172554;
+  --accent-subtle-foreground-dark: #93C5FD;
+  --focus-ring-dark: #60A5FA;
+  --success-background-dark: #052E16;
+  --success-foreground-dark: #86EFAC;
+  --warning-background-dark: #451A03;
+  --warning-foreground-dark: #FCD34D;
+  --danger-background-dark: #450A0A;
+  --danger-foreground-dark: #FCA5A5;
+  --info-background-dark: #172554;
+  --info-foreground-dark: #93C5FD;
+}
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+/* --- BASE TYPOGRAPHY START (do not edit manually) --- */
+@layer base {
+  body {
+    font-family: var(--font-body, inherit);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading, var(--font-body, inherit));
+  }
+}
+/* --- BASE TYPOGRAPHY END --- */
