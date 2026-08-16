@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon, CheckIcon, QuoteIcon, ShieldCheckIcon } from 'lucide-react';
-import { Logo } from '../components/Logo';
+import {Logo} from '../components/Logo';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { ThemeToggle } from '../components/common/ThemeToggle';
