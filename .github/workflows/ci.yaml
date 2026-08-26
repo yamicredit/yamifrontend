@@ -63,6 +63,6 @@ jobs:
           build-mode: none
         continue-on-error: true
 
-      - name: perform codeql analysis
+      - name: codeql analysis
         uses: github/codeql-action/analyze@v4.37.8
         continue-on-error: true
