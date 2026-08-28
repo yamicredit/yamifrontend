@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+permissions:
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Continous Integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v7.0.0
+
+      - name: setup node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: install dependencies
+        run: npm ci
+        continue-on-error: true
+
+      - name: run lint
+        run: npm run lint
+        continue-on-error: true
+
+      # - name: run tests
+      #   run: npm test
+      #   continue-on-error: true
+
+      - name: sonarqube scan
+        uses: SonarSource/sonarqube-scan-action@v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >
+            -Dsonar.organization=yamicredit
+            -Dsonar.projectKey=yamicredit_yamifrontend
+            -Dsonar.sources=src
+        continue-on-error: true
+
+      - name: snyk scan
+        uses: snyk/actions/node@v1.0.0
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+        continue-on-error: true
+
+      - name: initialize codeql
+        uses: github/codeql-action/init@v4.37.8
+        with:
+          languages: javascript-typescript
+          build-mode: none
+        continue-on-error: true
+
+      - name: codeql analysis
+        uses: github/codeql-action/analyze@v4.37.8
+        continue-on-error: true
