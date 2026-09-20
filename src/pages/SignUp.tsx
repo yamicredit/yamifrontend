@@ -11,7 +11,7 @@ import { mono, textPrimary, textSecondary } from '../utils/ui';
 
 export function SignUp() {
   const navigate = useNavigate();
-  const { startSignUp } = useAuth();
+  const { signUp, confirmSignUpCode, resendCode } = useAuth();
   const [stage, setStage] = useState<'details' | 'code'>('details');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -20,8 +20,9 @@ export function SignUp() {
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
+  const [resending, setResending] = useState(false);
 
-  const submitDetails = () => {
+  const submitDetails = async () => {
     const next: Record<string, string> = {};
     if (name.trim().length < 3) next.name = 'Enter your full name as it appears on your ID.';
     if (phone.replace(/\D/g, '').length < 10) next.phone = 'Enter a reachable phone number.';
@@ -29,19 +30,39 @@ export function SignUp() {
     setErrors(next);
     if (Object.keys(next).length) return;
     setSending(true);
-    window.setTimeout(() => {
-      setSending(false);
+    try {
+      await signUp({ name: name.trim(), phone, email: email.trim() || undefined });
       setStage('code');
-    }, 700);
+    } catch (err) {
+      setErrors({ phone: err instanceof Error ? err.message : 'Could not create your account.' });
+    } finally {
+      setSending(false);
+    }
   };
 
-  const verify = () => {
+  const verify = async () => {
     if (code.replace(/\D/g, '').length !== 6) {
       setErrors({ code: 'Enter the 6-digit code sent by SMS.' });
       return;
     }
-    startSignUp(phone);
-    navigate('/onboarding');
+    try {
+      await confirmSignUpCode(code);
+      navigate('/onboarding');
+    } catch (err) {
+      setErrors({ code: err instanceof Error ? err.message : 'That code did not work.' });
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      await resendCode();
+      setErrors({});
+    } catch (err) {
+      setErrors({ code: err instanceof Error ? err.message : 'Could not resend the code.' });
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
@@ -129,14 +150,24 @@ export function SignUp() {
           <Button fullWidth onClick={verify}>
             Verify number
           </Button>
-          <button
-          type="button"
-          onClick={() => setStage('details')}
-          className={`inline-flex items-center gap-1 text-xs font-medium ${textPrimary}`}>
-          
-            <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
-            Edit details
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+            type="button"
+            onClick={() => setStage('details')}
+            className={`inline-flex items-center gap-1 text-xs font-medium ${textPrimary}`}>
+
+              <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              Edit details
+            </button>
+            <button
+            type="button"
+            disabled={resending}
+            onClick={handleResend}
+            className="text-xs font-medium text-accent disabled:opacity-50">
+
+              {resending ? 'Resending…' : 'Resend code'}
+            </button>
+          </div>
           <p
           className={`flex items-start gap-2 rounded-lg border border-border p-3 text-[11px] leading-normal ${textSecondary}`}>
           

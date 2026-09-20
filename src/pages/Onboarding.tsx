@@ -81,6 +81,7 @@ export function Onboarding() {
   const [location, setLocation] = useState('');
   const [usage, setUsage] = useState<'lend' | 'borrow' | 'both'>('both');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   const isBusiness = accountType !== 'individual';
 
@@ -95,14 +96,35 @@ export function Onboarding() {
     return Object.keys(next).length === 0;
   };
 
-  const finish = () => {
-    completeOnboarding({
-      accountType,
-      businessName: isBusiness ? businessName.trim() : undefined,
-      location: location.trim(),
-      usage
-    });
-    navigate('/home');
+  const buildProfile = () => ({
+    accountType,
+    businessName: isBusiness ? businessName.trim() : undefined,
+    location: location.trim(),
+    usage
+  });
+
+  const finish = async () => {
+    setSubmitting(true);
+    try {
+      await completeOnboarding(buildProfile());
+      navigate('/home');
+    } catch (err) {
+      setErrors({ submit: err instanceof Error ? err.message : 'Could not save your profile.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const finishAndVerify = async () => {
+    setSubmitting(true);
+    try {
+      await completeOnboarding(buildProfile());
+      navigate('/verification');
+    } catch (err) {
+      setErrors({ submit: err instanceof Error ? err.message : 'Could not save your profile.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -288,25 +310,20 @@ export function Onboarding() {
             </Button> :
 
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={finish}>
+              <Button variant="secondary" loading={submitting} onClick={finish}>
                 Skip for now
               </Button>
-              <Button
-                onClick={() => {
-                  completeOnboarding({
-                    accountType,
-                    businessName: isBusiness ? businessName.trim() : undefined,
-                    location: location.trim(),
-                    usage
-                  });
-                  navigate('/verification');
-                }}>
-                
+              <Button loading={submitting} onClick={finishAndVerify}>
                 Verify identity
               </Button>
             </div>
             }
         </div>
+        {errors.submit ?
+          <p className="mt-3 text-xs text-danger-foreground dark:text-danger-foreground-dark">
+            {errors.submit}
+          </p> :
+          null}
         </main>
       </div>
     </div>);
