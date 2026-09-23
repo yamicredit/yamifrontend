@@ -1,9 +1,4 @@
-import {
-  AuthenticationDetails,
-  CognitoUser,
-  CognitoUserAttribute,
-  type CognitoUserSession } from
-'amazon-cognito-identity-js';
+import { CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 import { userPool } from './cognito';
 
 export function toE164(rawPhone: string): string {
@@ -11,11 +6,9 @@ export function toE164(rawPhone: string): string {
   return digits.startsWith('+') ? digits : `+${digits}`;
 }
 
-// The User Pool here authenticates by phone + SMS code, not a password the user
-// ever sees. Cognito's standard SignUp API still requires a password, so we
-// generate one and discard it — it only needs to satisfy the pool's password
-// policy. If a custom-auth (passwordless) Lambda flow is added later for sign-in,
-// this generated password becomes irrelevant.
+// Sign-in is passwordless (CUSTOM_AUTH via phone + SMS code), but Cognito's SignUp API still
+// requires a password. It's generated and discarded — it only needs to satisfy the pool's
+// password policy and is never used to authenticate.
 function generateDiscardablePassword(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
   const base = Array.from(bytes, (b) => b.toString(36)).join('');
@@ -28,16 +21,8 @@ export interface SignUpDetails {
   email?: string;
 }
 
-export interface SignUpResult {
-  // Held in memory only for the lifetime of the signup flow, so the app can
-  // authenticate once (right after phone confirmation) to get a bearer token
-  // for the backend's RegisterUser call. Never persisted or logged.
-  tempPassword: string;
-}
-
-export function signUpWithPhone({ name, phone, email }: SignUpDetails): Promise<SignUpResult> {
+export function signUpWithPhone({ name, phone, email }: SignUpDetails): Promise<void> {
   const phoneNumber = toE164(phone);
-  const tempPassword = generateDiscardablePassword();
   const attributes = [
   new CognitoUserAttribute({ Name: 'name', Value: name }),
   new CognitoUserAttribute({ Name: 'phone_number', Value: phoneNumber })];
@@ -49,7 +34,7 @@ export function signUpWithPhone({ name, phone, email }: SignUpDetails): Promise<
   return new Promise((resolve, reject) => {
     userPool.signUp(
       phoneNumber,
-      tempPassword,
+      generateDiscardablePassword(),
       attributes,
       [],
       (err) => {
@@ -57,7 +42,7 @@ export function signUpWithPhone({ name, phone, email }: SignUpDetails): Promise<
           reject(err);
           return;
         }
-        resolve({ tempPassword });
+        resolve();
       }
     );
   });
@@ -87,23 +72,4 @@ export function resendSignUpCode(phone: string): Promise<void> {
       resolve();
     });
   });
-}
-
-export function authenticate(phone: string, password: string): Promise<CognitoUserSession> {
-  const cognitoUser = new CognitoUser({ Username: toE164(phone), Pool: userPool });
-  const authDetails = new AuthenticationDetails({
-    Username: toE164(phone),
-    Password: password
-  });
-
-  return new Promise((resolve, reject) => {
-    cognitoUser.authenticateUser(authDetails, {
-      onSuccess: (session) => resolve(session),
-      onFailure: (err) => reject(err)
-    });
-  });
-}
-
-export function getIdToken(session: CognitoUserSession): string {
-  return session.getIdToken().getJwtToken();
 }

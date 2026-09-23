@@ -10,35 +10,47 @@ import { mono, textPrimary, textSecondary } from '../utils/ui';
 
 export function SignIn() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { requestSignInCode, confirmSignInCode } = useAuth();
   const [stage, setStage] = useState<'phone' | 'code'>('phone');
-  const [phone, setPhone] = useState('+234 803 441 2087');
+  const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
-  const sendCode = () => {
+  const sendCode = async () => {
     if (phone.replace(/\D/g, '').length < 10) {
       setError('Enter the phone number registered with YAMI.');
       return;
     }
     setError(undefined);
     setSending(true);
-    window.setTimeout(() => {
-      setSending(false);
+    try {
+      await requestSignInCode(phone);
       setStage('code');
-    }, 700);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send a code to that number.');
+    } finally {
+      setSending(false);
+    }
   };
 
-  const verify = () => {
+  const verify = async () => {
     if (code.replace(/\D/g, '').length !== 6) {
       setError('Enter the 6-digit code sent by SMS.');
       return;
     }
     setError(undefined);
-    signIn();
-    navigate('/home');
+    setVerifying(true);
+    try {
+      await confirmSignInCode(code);
+      navigate('/onboarding');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'That code did not work.');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   return (
@@ -101,7 +113,7 @@ export function SignIn() {
             setError(undefined);
           }} />
         
-          <Button fullWidth onClick={verify}>
+          <Button fullWidth loading={verifying} onClick={verify}>
             Sign in
           </Button>
           <div className="flex items-center justify-between">
@@ -109,12 +121,17 @@ export function SignIn() {
             type="button"
             onClick={() => setStage('phone')}
             className={`inline-flex items-center gap-1 text-xs font-medium ${textPrimary}`}>
-            
+
               <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
               Change number
             </button>
-            <button type="button" className="text-xs font-medium text-accent">
-              Resend code
+            <button
+            type="button"
+            disabled={sending}
+            onClick={sendCode}
+            className="text-xs font-medium text-accent disabled:opacity-50">
+
+              {sending ? 'Resending…' : 'Resend code'}
             </button>
           </div>
         </div>

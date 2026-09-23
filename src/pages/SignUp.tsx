@@ -47,7 +47,7 @@ export function SignUp() {
     }
     try {
       await confirmSignUpCode(code);
-      navigate('/onboarding');
+      navigate('/signin');
     } catch (err) {
       setErrors({ code: err instanceof Error ? err.message : 'That code did not work.' });
     }

@@ -79,6 +79,7 @@ interface YamiContextValue {
   loading: boolean;
   reputation: ReputationSummary;
   toast: ToastMessage | null;
+  pushToast: (message: Omit<ToastMessage, 'id'>) => void;
   dismissToast: () => void;
   getAgreement: (id: string) => Agreement | undefined;
   createAgreement: (input: NewAgreementInput) => Agreement;
@@ -633,6 +634,7 @@ export function YamiProvider({ children }: {children: React.ReactNode;}) {
       loading,
       reputation,
       toast,
+      pushToast,
       dismissToast: () => setToast(null),
       getAgreement,
       createAgreement,
@@ -659,6 +661,7 @@ export function YamiProvider({ children }: {children: React.ReactNode;}) {
     loading,
     reputation,
     toast,
+    pushToast,
     getAgreement,
     createAgreement,
     acceptAgreement,

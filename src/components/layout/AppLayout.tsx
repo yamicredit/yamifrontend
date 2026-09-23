@@ -14,7 +14,6 @@ import { AppShell } from '../AppShell';
 import { SideNav } from '../SideNav';
 import { Topbar } from '../Topbar';
 import { Logo } from '../Logo';
-import { Toast, ToastViewport } from '../Toast';
 import { BottomTabBar } from './BottomTabBar';
 import { useYami } from '../../contexts/YamiContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -41,8 +40,7 @@ function activeIdFromPath(pathname: string): string {
 export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { agreements, notifications, toast, dismissToast, user, settings, updateSettings } =
-  useYami();
+  const { agreements, notifications, user, settings, updateSettings } = useYami();
   const { signOut } = useAuth();
 
   const troubled = agreements.filter(isTroubled).length;
@@ -153,19 +151,6 @@ export function AppLayout() {
         <Outlet />
       </AppShell>
       <BottomTabBar resolutionCount={troubled} />
-      <ToastViewport position="bottom-center">
-        {toast ?
-        <Toast
-          key={toast.id}
-          title={toast.title}
-          description={toast.description}
-          variant={toast.variant}
-          open
-          duration={4500}
-          onClose={dismissToast} /> :
-
-        null}
-      </ToastViewport>
     </div>);
 
 }

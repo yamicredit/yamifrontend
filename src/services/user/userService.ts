@@ -1,27 +1,17 @@
 import { apiFetch } from '../client';
 
-export interface RegisterUserRequest {
+export interface SeedUserRequest {
   phone: string;
   name: string;
   email?: string;
-  businessName?: string;
-  area?: string;
-  identityType?: string;
-  identityNumber?: string;
-  userType?: string;
-  dateOfBirth?: string;
 }
 
-export interface RegisterUserResponse {
-  message: string;
-  id: string;
-}
-
-export function registerUser(payload: RegisterUserRequest, token: string): Promise<RegisterUserResponse> {
-  return apiFetch<RegisterUserResponse>('/api/v1/users', {
+// Called right after Cognito phone verification, so the user row exists in our own DB before
+// the first real sign-in (Cognito is the identity source of truth; this just mirrors it here).
+export function seedUser(payload: SeedUserRequest): Promise<unknown> {
+  return apiFetch<unknown>('/api/v1/users', {
     method: 'POST',
-    body: payload,
-    token
+    body: payload
   });
 }
 

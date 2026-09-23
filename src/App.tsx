@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { YamiProvider } from './contexts/YamiContext';
+import { YamiProvider, useYami } from './contexts/YamiContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppLayout } from './components/layout/AppLayout';
+import { Toast, ToastViewport } from './components/Toast';
 import { Landing } from './pages/Landing';
 import { SignIn } from './pages/SignIn';
 import { SignUp } from './pages/SignUp';
@@ -30,11 +31,31 @@ function PublicOnly({ children }: {children: React.ReactNode;}) {
   return <>{children}</>;
 }
 
+function GlobalToast() {
+  const { toast, dismissToast } = useYami();
+  return (
+    <ToastViewport position="bottom-center">
+      {toast ?
+      <Toast
+        key={toast.id}
+        title={toast.title}
+        description={toast.description}
+        variant={toast.variant}
+        open
+        duration={4500}
+        onClose={dismissToast} /> :
+
+      null}
+    </ToastViewport>);
+
+}
+
 export function App() {
   return (
     <YamiProvider>
       <AuthProvider>
         <BrowserRouter>
+          <GlobalToast />
           <Routes>
             <Route
               path="/"
