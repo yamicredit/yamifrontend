@@ -55,6 +55,30 @@ export interface CognitoAuthenticationResult {
   TokenType: string;
 }
 
+export interface InitiateAuthResult {
+  ChallengeName?: string;
+  Session?: string;
+  AuthenticationResult?: CognitoAuthenticationResult;
+}
+
+// Used once, right after signup phone verification, with the temporary password generated at
+// signup. Requires ALLOW_USER_PASSWORD_AUTH on the app client.
+export async function signInWithPassword(
+  phone: string,
+  password: string
+): Promise<CognitoAuthenticationResult> {
+  const result = await cognitoIdpRequest<InitiateAuthResult>('InitiateAuth', {
+    AuthFlow: 'USER_PASSWORD_AUTH',
+    ClientId: clientId,
+    AuthParameters: { USERNAME: toE164(phone), PASSWORD: password }
+  });
+
+  if (!result.AuthenticationResult?.IdToken) {
+    throw new Error('Could not sign you in automatically. Please sign in to continue.');
+  }
+  return result.AuthenticationResult;
+}
+
 export interface RespondToAuthChallengeResult {
   ChallengeName?: string;
   Session?: string;

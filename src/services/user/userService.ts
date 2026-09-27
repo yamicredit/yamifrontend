@@ -6,12 +6,13 @@ export interface SeedUserRequest {
   email?: string;
 }
 
-// Called right after Cognito phone verification, so the user row exists in our own DB before
-// the first real sign-in (Cognito is the identity source of truth; this just mirrors it here).
-export function seedUser(payload: SeedUserRequest): Promise<unknown> {
+// Called right after Cognito phone verification and the automatic sign-in that follows it, so the
+// user row exists in our own DB (Cognito is the identity source of truth; this mirrors it here).
+export function seedUser(payload: SeedUserRequest, token: string): Promise<unknown> {
   return apiFetch<unknown>('/api/v1/users', {
     method: 'POST',
-    body: payload
+    body: payload,
+    token
   });
 }
 

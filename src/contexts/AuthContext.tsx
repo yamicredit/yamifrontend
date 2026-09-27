@@ -1,8 +1,15 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { confirmSignUp, resendSignUpCode, signUpWithPhone, type SignUpDetails } from '../services/auth/authService';
+import {
+  confirmSignUp,
+  generateTemporaryPassword,
+  resendSignUpCode,
+  signUpWithPhone,
+  type SignUpDetails } from
+'../services/auth/authService';
 import {
   initiatePhoneSignIn,
-  respondToPhoneSignInChallenge } from
+  respondToPhoneSignInChallenge,
+  signInWithPassword } from
 '../services/auth/cognitoAuth';
 import { seedUser } from '../services/user/userService';
 import { useYami } from './YamiContext';
@@ -23,7 +30,7 @@ interface AuthContextValue {
   phone: string;
   profile: OnboardingProfile | null;
   idToken: string | null;
-  signUp: (details: SignUpDetails) => Promise<void>;
+  signUp: (details: Omit<SignUpDetails, 'password'>) => Promise<void>;
   confirmSignUpCode: (code: string) => Promise<void>;
   resendCode: () => Promise<void>;
   requestSignInCode: (phone: string) => Promise<void>;
@@ -41,33 +48,41 @@ export function AuthProvider({ children }: {children: React.ReactNode;}) {
   const [profile, setProfile] = useState<OnboardingProfile | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
 
-  // Held only in memory for the signup session: the name/email collected at signup, needed once
-  // phone verification succeeds to seed the user record. Never persisted, never exposed via context.
-  const pendingSignUp = useRef<{ name: string; email?: string } | null>(null);
+  // Held only in memory for the signup session: the name/email collected at signup and the
+  // temporary password, needed once phone verification succeeds to sign in and seed the user
+  // record. Never persisted, never exposed via context.
+  const pendingSignUp = useRef<{ name: string; email?: string; password: string } | null>(null);
 
   // The Cognito CUSTOM_AUTH session token, carried from InitiateAuth to RespondToAuthChallenge.
   const pendingSignIn = useRef<{ session: string } | null>(null);
 
-  const signUp = useCallback(async (details: SignUpDetails) => {
-    await signUpWithPhone(details);
-    pendingSignUp.current = { name: details.name, email: details.email };
+  const signUp = useCallback(async (details: Omit<SignUpDetails, 'password'>) => {
+    const password = generateTemporaryPassword();
+    await signUpWithPhone({ ...details, password });
+    pendingSignUp.current = { name: details.name, email: details.email, password };
     setPhone(details.phone);
     setStatus('pending_verification');
   }, []);
 
   const confirmSignUpCode = useCallback(
     async (code: string) => {
+      const pending = pendingSignUp.current;
+      if (!pending) throw new Error('Your signup session expired. Please sign up again.');
+
       await confirmSignUp(phone, code);
 
-      const pending = pendingSignUp.current;
-      await seedUser({ phone, name: pending?.name ?? '', email: pending?.email });
+      // The token is only used to save the user record; the session is then dropped so the user
+      // signs in normally (phone + SMS code) to continue.
+      const tokens = await signInWithPassword(phone, pending.password);
+      await seedUser({ phone, name: pending.name, email: pending.email }, tokens.IdToken);
       pendingSignUp.current = null;
 
+      setIdToken(null);
       setStatus('signed_out');
       setPhone('');
       pushToast({
         title: 'Registration successful',
-        description: 'Kindly login to continue onboarding.',
+        description: 'Kindly login to continue.',
         variant: 'success'
       });
     },
